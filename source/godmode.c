@@ -1423,7 +1423,13 @@ u32 FileHandlerMenu(char* current_path, u32* cursor, u32* scroll, DirStruct* cur
         } else if (ShowUnlockSequence(3, "%s (%dkB)\nBoot FIRM via chainloader?", pathstr, firm_size / 1024)) {
             if ((FileGetData(curr_entry->path, TEMP_BUFFER, firm_size, 0) == firm_size) &&
                 (ValidateFirm(TEMP_BUFFER, firm_size) != 0)) {
-                BootFirm((FirmHeader*)(void*)TEMP_BUFFER, curr_entry->path);
+                char bootpath[256];
+                if (*(curr_entry->path) == '0') {
+                    snprintf(bootpath, 256, "sdmc%s", curr_entry->path + 1);
+                } else if (*(curr_entry->path) == '1') {
+                    snprintf(bootpath, 256, "nand%s", curr_entry->path + 1);
+                } else snprintf(bootpath, 256, "dummy"); // not enough - check this!
+                BootFirm((FirmHeader*)(void*)TEMP_BUFFER, bootpath);
                 while(1);
             } else ShowPrompt(false, "Not a vaild FIRM, can't launch");
         }
